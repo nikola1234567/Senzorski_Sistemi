@@ -82,6 +82,7 @@ public class MainAppLab2 {
 		int pom=1;
 		while(pom<=red) {
 			zbir+=set[row][lastElement-pom];
+			pom++;
 		}
 		return zbir/red;
 		
@@ -214,7 +215,7 @@ public class MainAppLab2 {
 		public String toString() {
 			return "Result [threshold1=" + threshold1 + ", threshold2=" + threshold2 + ", numberOfSent=" + numberOfSent
 					+ ", percentageOfSent=" + df.format(percentageOfSent) 
-					+ ", meanSquareError2=" + df.format(meanSquareError) + "]";
+					+ ", meanSquareError=" + df.format(meanSquareError) + "]";
 		}
 		
 		
