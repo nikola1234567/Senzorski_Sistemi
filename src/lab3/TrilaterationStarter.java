@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.Random;
 
 public class TrilaterationStarter {
-	int L=100;
+	int L=200;
 	int R;
 	int N=100;
 	int fa;
@@ -53,19 +53,31 @@ public class TrilaterationStarter {
 	}
 	
 	private double inProcent(int x,int y) {
-		return (double)x/(double)y*100;
+		return ((double)x/(double)y)*100;
 	}
 	
 	private void createSensorNodes() {
+		Random r = new Random();
 		LinkedList<PointInSpace> points=this.generatePoints();
 		Iterator<PointInSpace> it = points.iterator();
 		int brojac=0;
 		int anchors=this.getNumberOfAnchors();
+		LinkedList<Integer> an = new LinkedList<Integer>();
+		int copy=anchors;
+		while(anchors!=0) {
+			int chosen = r.nextInt(this.N-1);
+			if(!an.contains(chosen)) {
+				an.add(chosen);
+				anchors--;
+			}
+		}
 		while(it.hasNext()) {
-			this.nodes.add(new SensorNode(this.generateId(),
-					(brojac >= N-1-anchors) ? true : false,
+			long id=this.generateId();
+			this.nodes.add(new SensorNode(id,
+					(an.contains((int)id)) ? true : false,
 					 this.R, 
-					 it.next()));
+					 it.next(),
+					 this.err));
 			brojac++;
 		}
 		
@@ -95,17 +107,21 @@ public class TrilaterationStarter {
 		int[] fa_s={15, 20, 25, 30};
 		int[] R_s= {30,35,40,45,50,55,60};
 
+		this.err=10;
 		for(int ff: fa_s) {
 			this.fa=ff;
 			Graphic graphic=new Graphic();
 			for(int rr : R_s) {
-				System.out.println(rr);
+				this.R=rr;
+				//System.out.println(rr);
 				int zbir=0;
 				for(int i=0;i<10;i++) {
+					this.nodes.clear();
+					this.counter=0;
 					this.createSensorNodes();
 					zbir+=this.localizeNodes();
 				}
-				zbir/=15.0f;
+				zbir/=10.0f;
 				graphic.addPoint(new PointInSpace(rr,zbir));
 			}
 			graphic.setName("Graphic for fa="+ff);
@@ -122,21 +138,26 @@ public class TrilaterationStarter {
 	
 	public void testGraph__X_Fa__Y_Loc__Change_R() {
 		LinkedList<Graphic> graphics=new LinkedList<Graphic>();
-		int[] fa_s={15, 20, 25, 30};
-		int[] R_s= {30,35,40,45,50,55,60};
-
+		int[] fa_s={15, 20, 25, 30, 35, 40, 45};
+		int[] R_s= {30,35,40,45};
+		
+		this.err=10;
 		for(int rr: R_s) {
+			this.R=rr;
 			Graphic graphic=new Graphic();
 			for(int ff : fa_s) {
 				this.fa=ff;
 				int zbir=0;
 				for(int i=0;i<10;i++) {
+					this.nodes.clear();
+					this.counter=0;
 					this.createSensorNodes();
 					zbir+=this.localizeNodes();
 				}
-				zbir/=15.0f;
-				graphic.addPoint(new PointInSpace(rr,zbir));
+				zbir/=10.0f;
+				graphic.addPoint(new PointInSpace(ff,zbir));
 			}
+			graphic.setName("Graphic for R="+rr);
 			graphics.add(graphic);
 		}
 		

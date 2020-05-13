@@ -7,6 +7,8 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class SensorNode {
 	long id;
@@ -19,12 +21,13 @@ public class SensorNode {
 	
 	
 	
-	public SensorNode(long id, boolean anchor, int range, PointInSpace coordinates) {
+	public SensorNode(long id, boolean anchor, int range, PointInSpace coordinates,int error) {
 		super();
 		this.id = id;
 		this.anchor = anchor;
 		this.range = range;
 		this.coordinates = coordinates;
+		this.error=error;
 	}
 	
 	public void generalize(LinkedList<SensorNode> nodess) {
@@ -35,6 +38,10 @@ public class SensorNode {
 			nodes[index++]=it.next();
 		}
 		this.generateNodesInRange(nodes);
+	}
+	
+	private int getPercentage(int x,int y) {
+		return (int)(x*(y/100.0f));
 	}
 
 	public boolean localizeNonIterativeAlgorithm() {
@@ -65,11 +72,14 @@ public class SensorNode {
 	
 	
 	private void generateNodesInRange(SensorNode []nodes) {
+		Random r = new Random(); 
 		this.nodesInRange=new Hashtable<Long,DistanceNodePair>();
 		for(SensorNode node : nodes) {
 			int distance=this.coordinates.euclidianDistance(node.coordinates);
-			if(distance<=this.range) {
-				this.nodesInRange.put(node.id, new DistanceNodePair(distance,node));
+			int noise=this.getPercentage(distance, error);
+			int distanceWithNoise=(int) (r.nextGaussian()*noise+distance);
+			if(distanceWithNoise<=this.range) {
+				this.nodesInRange.put(node.id, new DistanceNodePair(distanceWithNoise,node));
 			}
 		}
 	}

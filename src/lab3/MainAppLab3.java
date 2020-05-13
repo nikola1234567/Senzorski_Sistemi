@@ -13,6 +13,7 @@ public class MainAppLab3 {
 		TrilaterationStarter ts=new TrilaterationStarter();
 		
 		ts.testGraph__X_R__Y_Loc__Change_Fa();	
+		ts.testGraph__X_Fa__Y_Loc__Change_R();
 		
 		
 
