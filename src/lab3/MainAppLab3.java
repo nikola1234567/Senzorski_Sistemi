@@ -1,22 +1,14 @@
 package lab3;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
 public class MainAppLab3 {
-	
-
-	public static void main(String[] args) throws IOException {
-		// TODO Auto-generated method stub
+	public static void main(String[] args) {
+		TrilaterationStarter ts = new TrilaterationStarter();
 		
-		TrilaterationStarter ts=new TrilaterationStarter();
-		
-		ts.testGraph__X_R__Y_Loc__Change_Fa();	
-		ts.testGraph__X_Fa__Y_Loc__Change_R();
-		
-		
-
+		//ts.generateGraphic__X_R__Y_Loc__Change_fa__Fixed_err();
+		//ts.generateGraphic__X_fa__Y_Loc__Change_R__Fixed_err();
+		//ts.generateGraphic__X_R__Y_ALE__Change_err__Fixed_fa("non-iterative");
+		//ts.generateGraphic__X_err__Y_ALE__Change_R__Fixed_fa("non-iterative");
+		//ts.generateGraphic__X_fa__Y_ALE__Change_R__Fixed_err("non-iterative");
 	}
 
 }

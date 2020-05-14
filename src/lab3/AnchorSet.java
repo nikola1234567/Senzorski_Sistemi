@@ -1,68 +1,78 @@
 package lab3;
 
 public class AnchorSet {
-	SensorNode node1;
-	SensorNode node2;
-	SensorNode node3;
-	boolean found=false;
-	int counter=1;
-	
-	public AnchorSet() {}
-	
-	public SensorNode getNode1() {
-		return node1;
-	}
-	public void setNode1(SensorNode node1) {
-		this.node1 = node1;
-	}
-	public SensorNode getNode2() {
-		return node2;
-	}
-	public void setNode2(SensorNode node2) {
-		this.node2 = node2;
-	}
-	public SensorNode getNode3() {
-		return node3;
-	}
-	public void setNode3(SensorNode node3) {
-		this.node3 = node3;
-	}
-	public boolean isFound() {
-		return found;
-	}
-	public void setFound(boolean found) {
-		this.found = found;
-	}
-	
-	public void insertAncor(SensorNode sn) {
-		if(!found) {
-			if(counter==1) {
-				this.setNode1(sn);
-				counter++;
-			}else if(counter==2) {
-				this.setNode2(sn);
-				counter++;
-			}else if(counter==3) {
-				this.setNode3(sn);
-				counter++;
-			}
-			
-			if(counter==4) {
-				this.setFound(true);
-			}
-			
-		}
-	}
+    boolean found=false;
+    Node n1,n2,n3;
+    int br=0;
 
-	@Override
-	public String toString() {
-		return "AnchorSet [node1=" + node1 + ", node2=" + node2 + ", node3=" + node3 + "]";
-	}
+    public AnchorSet() {}
+    public AnchorSet(boolean found, Node n1, Node n2, Node n3) {
+        this.found = found;
+        this.n1 = n1;
+        this.n2 = n2;
+        this.n3 = n3;
+    }
 
-	
-	
-	
-	
-	
-	
+    public boolean isFound() {
+        return found;
+    }
+
+    public void setFound(boolean found) {
+        this.found = found;
+    }
+
+    public Node getN1() {
+        return n1;
+    }
+
+    public void setN1(Node n1) {
+        this.n1 = n1;
+    }
+
+    public Node getN2() {
+        return n2;
+    }
+
+    public void setN2(Node n2) {
+        this.n2 = n2;
+    }
+
+    public Node getN3() {
+        return n3;
+    }
+
+    public void setN3(Node n3) {
+        this.n3 = n3;
+    }
+
+    public void insertNode(Node node){
+        if(!isFound()){
+            if (br==0){
+                this.n1=node;
+                br++;
+            }else if (br==1){
+                this.n2=node;
+                br++;
+            }else if(br==2){
+                this.n3=node;
+                br++;
+            }
+
+            if(br==3){
+                found=true;
+            }
+
+        }
+    }
+
+    @Override
+    public String
+    toString() {
+        return "AnchorSet [" +
+                "found=" + found +
+                ", n1=" + n1 +
+                ", n2=" + n2 +
+                ", n3=" + n3 +
+                ']';
+    }
 }

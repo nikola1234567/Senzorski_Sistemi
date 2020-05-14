@@ -1,171 +1,333 @@
 package lab3;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
 
 public class TrilaterationStarter {
-	int L=200;
-	int R;
-	int N=100;
-	int fa;
-	int err;
-	
-	LinkedList<SensorNode> nodes=new LinkedList<SensorNode>();
-	
-	public TrilaterationStarter() {}
-	
-	public TrilaterationStarter(int l, int r, int n, int fa, int err) {
-		super();
-		L = l;
-		R = r;
-		N = n;
-		this.fa = fa;
-		this.err = err;
-	}
+    int L=200;
+    int N=100;
+    int counter=0;
 
-	long counter=0;
-	
-	private long generateId() {
-		return this.counter++;
-	}
-	
-	private LinkedList<PointInSpace> generatePoints() {
-		LinkedList<PointInSpace> listOfCoordinates = new LinkedList<PointInSpace>();
-		Random random=new Random();
-		int generated=0;
-		while(generated<N) {
-			int x = random.nextInt(this.L - 1);
-			int y = random.nextInt(this.L - 1);
-			PointInSpace point = new PointInSpace(x,y);
-			if(!listOfCoordinates.contains(point)) {
-				listOfCoordinates.add(point);
-				generated++;
-			}
-		}
-		
-		
-		return listOfCoordinates;
-	}
-	
-	private int getNumberOfAnchors() {
-		return (int)(this.N*(this.fa/100.0f));
-	}
-	
-	private double inProcent(int x,int y) {
-		return ((double)x/(double)y)*100;
-	}
-	
-	private void createSensorNodes() {
-		Random r = new Random();
-		LinkedList<PointInSpace> points=this.generatePoints();
-		Iterator<PointInSpace> it = points.iterator();
-		int brojac=0;
-		int anchors=this.getNumberOfAnchors();
-		LinkedList<Integer> an = new LinkedList<Integer>();
-		int copy=anchors;
-		while(anchors!=0) {
-			int chosen = r.nextInt(this.N-1);
-			if(!an.contains(chosen)) {
-				an.add(chosen);
-				anchors--;
-			}
-		}
-		while(it.hasNext()) {
-			long id=this.generateId();
-			this.nodes.add(new SensorNode(id,
-					(an.contains((int)id)) ? true : false,
-					 this.R, 
-					 it.next(),
-					 this.err));
-			brojac++;
-		}
-		
-	}
-	
-	public double localizeNodes() {
-		int localized=0,non_localized=0;
-		Iterator<SensorNode> it=this.nodes.iterator();
-		while(it.hasNext()) {
-			SensorNode sn=it.next();
-			sn.generalize(nodes);
-			boolean successfullLocalization=sn.localizeNonIterativeAlgorithm();
-			if(successfullLocalization) {
-				localized++;
-			}else {
-				non_localized++;
-			}
-		}
-		
-		//System.out.println("Localized: "+this.inProcent(localized, N)+"% Non-Localized: "+this.inProcent(non_localized, N)+"%");
-		//double[] res={this.inProcent(localized, N), this.inProcent(non_localized, N)};
-		return this.inProcent(localized, N);
-	}
-	
-	public void testGraph__X_R__Y_Loc__Change_Fa(){
-		LinkedList<Graphic> graphics=new LinkedList<Graphic>();
-		int[] fa_s={15, 20, 25, 30};
-		int[] R_s= {30,35,40,45,50,55,60};
+    public int generatId(){
+        return this.counter++;
+    }
 
-		this.err=10;
-		for(int ff: fa_s) {
-			this.fa=ff;
-			Graphic graphic=new Graphic();
-			for(int rr : R_s) {
-				this.R=rr;
-				//System.out.println(rr);
-				int zbir=0;
-				for(int i=0;i<10;i++) {
-					this.nodes.clear();
-					this.counter=0;
-					this.createSensorNodes();
-					zbir+=this.localizeNodes();
-				}
-				zbir/=10.0f;
-				graphic.addPoint(new PointInSpace(rr,zbir));
-			}
-			graphic.setName("Graphic for fa="+ff);
-			graphics.add(graphic);
-		}
-		
-		System.out.println("testGraph__X_R__Y_Loc__Change_Fa\n");
-		Iterator<Graphic> it = graphics.iterator();
-		while(it.hasNext()) {
-			System.out.println(it.next().toString());
-		}
-		
-	}
-	
-	public void testGraph__X_Fa__Y_Loc__Change_R() {
-		LinkedList<Graphic> graphics=new LinkedList<Graphic>();
-		int[] fa_s={15, 20, 25, 30, 35, 40, 45};
-		int[] R_s= {30,35,40,45};
-		
-		this.err=10;
-		for(int rr: R_s) {
-			this.R=rr;
-			Graphic graphic=new Graphic();
-			for(int ff : fa_s) {
-				this.fa=ff;
-				int zbir=0;
-				for(int i=0;i<10;i++) {
-					this.nodes.clear();
-					this.counter=0;
-					this.createSensorNodes();
-					zbir+=this.localizeNodes();
-				}
-				zbir/=10.0f;
-				graphic.addPoint(new PointInSpace(ff,zbir));
-			}
-			graphic.setName("Graphic for R="+rr);
-			graphics.add(graphic);
-		}
-		
-		System.out.println("testGraph__X_Fa__Y_Loc__Change_R\n");
-		Iterator<Graphic> it = graphics.iterator();
-		while(it.hasNext()) {
-			System.out.println(it.next().toString());
-		}
-	}
+    public double getFromPercent(int x, int y){
+        return (x/100.0f)*y;
+    }
+
+    public Node[] createNodes(int fa, int err, int R){
+        Node[] nodes=new Node[N];
+        Random random = new Random();
+        LinkedList<Point> points=new LinkedList<>();
+        int pom = this.N;
+        while (pom!=0){
+            int x = random.nextInt(this.L-1);
+            int y = random.nextInt(this.L-1);
+            Point point=new Point(x,y);
+            if(!points.contains(point)){
+                points.add(point);
+                pom--;
+            }
+        }
+
+        LinkedList<Integer> an=new LinkedList<>();
+        int anchors=(int)this.getFromPercent(fa, this.N);
+        while (anchors!=0){
+            int id = random.nextInt(this.N-1);
+            if (!an.contains(id)){
+                an.add(id);
+                anchors--;
+            }
+        }
+        this.counter=0;
+        int index=0;
+        for (Point point:points){
+            int id=this.generatId();
+            nodes[index++]=new Node(id,R,err,point,
+                    (an.contains(id) ? true : false));
+        }
+
+        for (Node node:nodes){
+            node.hearNodesInRange(nodes);
+        }
+        return nodes;
+    }
+
+    public int ALE(Node[] nodes, int R){
+        double zbir = 0;
+        int brojac=0;
+        for (Node node:nodes){
+            if(!node.was_anchor&&node.localized){
+                zbir+=node.point.eucledianDistance(node.point_prim);
+            }
+            if (!node.was_anchor){
+                brojac++;
+            }
+        }
+        zbir/=brojac;
+        return (int)(zbir*(100.0f/R));
+    }
+
+    public NodesLocalized localizeNetOfNodes(Node[] nodes,String algorithm,String type){
+        int br=0;
+        for (Node node:nodes){
+        	boolean x;
+        	if(algorithm.equals("non-iterative"))
+        		x=node.localizeNonIterativeApproach();
+            ///System.out.println(node.point+"------>"+node.point_prim);
+        	else {
+        		x = node.localizeIterativeApproach(type);
+        	}
+
+            if(x){
+                br++;
+            }
+        }
+
+        // System.out.println(br);
+        return new NodesLocalized((double)(((double)br/this.N)*100.0f),nodes);
+    }
+
+    public void testCreaatingNodes(){
+        Node[] nodes=this.createNodes(20,10,35);
+        for (Node node:nodes){
+            node.hearNodesInRange(nodes);
+        }
+
+        for (Node node: nodes){
+           // node.localize();
+        }
+
+        for (Node node: nodes){
+            node.getMostRelevantAnchorSet();
+        }
+
+    }
+
+    public int getN() {
+        return N;
+    }
+    
+    ///Prv grafik prv tip non-iterative
+    public void generateGraphic__X_R__Y_Loc__Change_fa__Fixed_err(){
+        int err=10;
+        int fa[] ={20,25,30,35};
+        int R[] = {30,35,40,45,50,55,60};
+        LinkedList<Graphic> graphics=new LinkedList<>();
+
+        for (int ff: fa){
+            Graphic graphic = new Graphic();
+            graphic.setName("Graphic for Fa="+ ff+"%");
+            for (int rr: R){
+                int zbir=0;
+                for (int i=0;i<15;i++){
+                    Node[] nodes=this.createNodes(ff,err,rr);
+                    NodesLocalized nodesLocalized=this.localizeNetOfNodes(nodes,"non-iterative","");
+                   // System.out.println(nodesLocalized.localized);
+                    zbir+=nodesLocalized.localized;
+                }
+                //System.out.println(zbir);
+                zbir/=15.0f;
+                //System.out.println(zbir);
+                Point point=new Point(rr, zbir);
+                graphic.addPoint(point);
+            }
+            graphics.add(graphic);
+        }
+
+        System.out.println("\ngenerateGraphic__X_R__Y_Loc__Change_fa__Fixed_err\n");
+        for (Graphic graphic: graphics){
+            System.out.println(graphic.toString());
+        }
+    }
+    
+    //Vtor grafik prv tip non-iterative
+    public void generateGraphic__X_fa__Y_Loc__Change_R__Fixed_err(){
+        int err = 10;
+        int[] R={30,35,40,55};
+        int[] fa={20,25,30,35,40,45,50};
+        LinkedList<Graphic> graphics=new LinkedList<>();
+
+        for (int rr: R){
+            Graphic graphic=new Graphic();
+            graphic.setName("Graphic for R="+rr+"m");
+            for (int ff: fa){
+                int zbir=0;
+                for (int i = 0; i< 15;i++){
+                    Node[] nodes=this.createNodes(ff,err,rr);
+                    NodesLocalized nodesLocalized=this.localizeNetOfNodes(nodes,"non-iterative","");
+                    zbir+=nodesLocalized.localized;
+                }
+                zbir/=15.0f;
+                graphic.addPoint(new Point(ff, zbir));
+            }
+            graphics.add(graphic);
+        }
+
+        System.out.println("\ngenerateGraphic__X_fa__Y_Loc__Change_R__Fixed_err\n");
+
+        for (Graphic graphic: graphics){
+            System.out.println(graphic.toString());
+        }
+    }
+    
+    
+
+    //analiza na hevristika 1
+    public void test_generateGraphic__X_R__Y_Loc__Change_fa__Fixed_err_Najbliski(){
+        int err=10;
+        int fa[] ={20,25,30,35};
+        int R[] = {45,50,55,60};
+        LinkedList<Graphic> graphics=new LinkedList<>();
+
+        for (int ff: fa){
+            Graphic graphic = new Graphic();
+            graphic.setName("Graphic for Fa="+ ff+"%");
+            for (int rr: R){
+                int zbir=0;
+                for (int i=0;i<15;i++){
+                    Node[] nodes=this.createNodes(ff,err,rr);
+                    NodesLocalized nodesLocalized=this.localizeNetOfNodes(nodes,"iterative","Najbliski");
+                    // System.out.println(nodesLocalized.localized);
+                    zbir+=nodesLocalized.localized;
+                }
+                //System.out.println(zbir);
+                zbir/=15.0f;
+                //System.out.println(zbir);
+                Point point=new Point(rr, zbir);
+                graphic.addPoint(point);
+            }
+            graphics.add(graphic);
+        }
+
+        System.out.println("\ntest_generateGraphic__X_R__Y_Loc__Change_fa__Fixed_err_Najbliski\n");
+        for (Graphic graphic: graphics){
+            System.out.println(graphic.toString());
+        }
+    }
+    
+    //analiza na hevristika 2
+    public void test_generateGraphic__X_R__Y_Loc__Change_fa__Fixed_err_Najrelevantni(){
+        int err=10;
+        int fa[] ={20,25,30,35};
+        int R[] = {45,50,55,60};
+        LinkedList<Graphic> graphics=new LinkedList<>();
+
+        for (int ff: fa){
+            Graphic graphic = new Graphic();
+            graphic.setName("Graphic for Fa="+ ff+"%");
+            for (int rr: R){
+                int zbir=0;
+                for (int i=0;i<15;i++){
+                    Node[] nodes=this.createNodes(ff,err,rr);
+                    NodesLocalized nodesLocalized=this.localizeNetOfNodes(nodes,"iterative","most-relevant");
+                    // System.out.println(nodesLocalized.localized);
+                    zbir+=nodesLocalized.localized;
+                }
+                //System.out.println(zbir);
+                zbir/=15.0f;
+                //System.out.println(zbir);
+                Point point=new Point(rr, zbir);
+                graphic.addPoint(point);
+            }
+            graphics.add(graphic);
+        }
+
+        System.out.println("\ntest_generateGraphic__X_R__Y_Loc__Change_fa__Fixed_err_Najrelevantni\n");
+        for (Graphic graphic: graphics){
+            System.out.println(graphic.toString());
+        }
+    }
+
+
+    public void generateGraphic__X_R__Y_ALE__Change_err__Fixed_fa(String algorithm){
+        int fa=20;
+        int[] err={5,15,25,30};
+        int[] R={30,35,40,45,50,55,60};
+        LinkedList<Graphic> graphics=new LinkedList<>();
+
+        for (int ee : err){
+            Graphic graphic=new Graphic();
+            graphic.setName("Graphic for err="+ee+"%");
+            for (int rr : R){
+                int zbir=0;
+                for (int i = 0; i< 15;i++){
+                    Node[] nodes=this.createNodes(fa,ee,rr);
+                    NodesLocalized nodesLocalized=this.localizeNetOfNodes(nodes,algorithm,"Najbliski");
+                    zbir+=this.ALE(nodesLocalized.nodes,rr);
+                }
+                zbir/=15.0f;
+                graphic.addPoint(new Point(rr, zbir));
+            }
+            graphics.add(graphic);
+        }
+
+        System.out.println("\ngenerateGraphic__X_R__Y_ALE__Change_err__Fixed_fa\n");
+
+        for (Graphic graphic: graphics){
+            System.out.println(graphic.toString());
+        }
+
+    }
+
+    public void generateGraphic__X_err__Y_ALE__Change_R__Fixed_fa(String algorithm){
+        int fa=20;
+        int R[] = {30,35,40,45};
+        int err[] = {10,15,20,25,30,35,40};
+        LinkedList<Graphic> graphics=new LinkedList<>();
+
+        for (int rr: R){
+            Graphic graphic=new Graphic();
+            graphic.setName("Graphic for R="+rr+"m");
+            for(int ee : err){
+                int zbir=0;
+                for (int i = 0; i< 15;i++){
+                    Node[] nodes=this.createNodes(fa,ee,rr);
+                    NodesLocalized nodesLocalized=this.localizeNetOfNodes(nodes,algorithm,"Najbliski");
+                    zbir+=this.ALE(nodesLocalized.nodes,rr);
+                }
+                zbir/=15.0f;
+                graphic.addPoint(new Point(ee, zbir));
+            }
+            graphics.add(graphic);
+        }
+
+        System.out.println("\ngenerateGraphic__X_err__Y_ALE__Change_R__Fixed_fa\n");
+        for (Graphic graphic: graphics){
+            System.out.println(graphic.toString());
+        }
+
+    }
+
+    public void generateGraphic__X_fa__Y_ALE__Change_R__Fixed_err(String algorithm){
+        int err=10;
+        int R[] ={30,35,40,45};
+        int fa[]={20,25,30,35,40,45,50};
+        LinkedList<Graphic> graphics=new LinkedList<>();
+
+        for (int rr: R){
+            Graphic graphic=new Graphic();
+            graphic.setName("Graphic for R="+rr+"m");
+            for (int ff: fa){
+                int zbir=0;
+                for (int i = 0; i< 15;i++){
+                    Node[] nodes=this.createNodes(ff,err,rr);
+                    NodesLocalized nodesLocalized=this.localizeNetOfNodes(nodes,algorithm,"Najbliski");
+                    zbir+=this.ALE(nodesLocalized.nodes,rr);
+                }
+                zbir/=15.0f;
+                graphic.addPoint(new Point(ff, zbir));
+            }
+            graphics.add(graphic);
+        }
+
+        System.out.println("\ngenerateGraphic__X_fa__Y_ALE__Change_R__Fixed_err\n");
+        for (Graphic graphic: graphics){
+            System.out.println(graphic.toString());
+        }
+
+    }
+
 
 }
